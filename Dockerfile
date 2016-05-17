@@ -1,10 +1,11 @@
-FROM ubuntu:14.04
+FROM gliderlabs/alpine:3.3
 
-RUN apt-get update -qq && apt-get install -qq -y znc
-RUN mkdir -p /var/run/ircd
-RUN chown -R irc:irc /var/run/ircd
+RUN apk-install znc su-exec\
+  && adduser irc -h /var/run/ircd -D
 
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+COPY docker-entrypoint.sh /
+ENTRYPOINT ["/docker-entrypoint.sh"]
 
-USER irc
-CMD ["/usr/bin/znc", "-f", "-n", "-d", "/var/run/ircd"]
+WORKDIR /var/run/ircd
+VOLUME /var/run/ircd
+CMD ["znc"]
